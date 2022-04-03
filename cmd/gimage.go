@@ -33,6 +33,18 @@ func Decode(buffer *[]byte) (image.Image, string, error) {
 	return image.Decode(r)
 }
 
+func DecodeAllGIF(buffer *[]byte) (*gif.GIF, error) {
+	if buffer == nil {
+		return nil, ErrImageBufferPtrIsNil
+	}
+	r := bytes.NewReader(*buffer)
+	g, err := gif.DecodeAll(r)
+	if err != nil {
+		return nil, err
+	}
+	return g, nil
+}
+
 // Encode is a wrapper for various image encoder.
 func Encode(img image.Image, imageTypeName string) ([]byte, error) {
 	var (
@@ -44,7 +56,7 @@ func Encode(img image.Image, imageTypeName string) ([]byte, error) {
 	case "png":
 		err = png.Encode(buff, img)
 	case "jpeg":
-		err = jpeg.Encode(buff, img, &jpeg.Options{Quality: 90})
+		err = jpeg.Encode(buff, img, &jpeg.Options{Quality: jpeg.DefaultQuality})
 	case "gif":
 		err = gif.Encode(buff, img, nil)
 	//case "webp":

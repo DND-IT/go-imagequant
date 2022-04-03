@@ -15,6 +15,7 @@ import (
 /*
 #cgo CFLAGS: -I.
 #cgo LDFLAGS: -L. -limagequant
+#include "stdlib.h"
 #include "libimagequant.h"
 #include "go-imagequant.h"
 */
@@ -22,22 +23,15 @@ import "C"
 
 import (
 	"image/draw"
-	_ "image/png"
-	"io/fs"
-	"io/ioutil"
 )
-
-func Ping() string {
-	return "Ping will return Pong"
-}
 
 // GetLiqVersion returns version if libimagequant used.
 func GetLiqVersion() int {
 	return int(C.int(C.liq_version()))
 }
 
-// Quant call c lib.
-func Quant(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
+// Run call c lib imagequant functions needed for quantize an RGBA image.
+func Run(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
 
 	if imgRGBA == nil {
 		return nil, fmt.Errorf("can not quant nil image")
@@ -46,52 +40,67 @@ func Quant(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
 	// get ptr for first slice item
 	pixelPtr := &imgRGBA.Pix[0]
 	// create unsafe unsigned char pointer needed for C
-	rawRGBAPixels := (*C.uchar)(unsafe.Pointer(pixelPtr))
-	// defer C.free(unsafe.Pointer(rawRGBAPixels))
+	ptrToRawRGBAPixels := (*C.uchar)(unsafe.Pointer(pixelPtr))
+	// defer C.free((*C.uchar)(unsafe.Pointer(ptrToRawRGBAPixels)))
 
-	quantResult := C.imgQuant{}
-	quantResult = C.doQuant(rawRGBAPixels,
-		C.uint(imgRGBA.Bounds().Size().X),
-		C.uint(imgRGBA.Bounds().Size().Y),
-		C.double(gamma),
-	)
-	// defer C.free((C.pngQuant).unsafe.Pointer(quantResult))
-	// fmt.Println(quantResult.Status)
-	// fmt.Println(quantResult.Size)
+	// liq_attr *handle = liq_attr_create();
+	handle := C.liq_attr_create()
+	defer C.liq_attr_destroy_wrapper(handle)
 
-	// copy unsigned char from c into go []uint8
+	// liq_image *input_image = liq_image_create_rgba(handle, raw_rgba_pixels, (int) width, (int) height, gamma);
+	cWidth := C.int(imgRGBA.Bounds().Size().X)
+	cHeight := C.int(imgRGBA.Bounds().Size().Y)
+	cGamma := C.double(gamma)
 
-	// create a new palette
+	inputImage := C.liq_image_create_rgba_wrapper(handle, ptrToRawRGBAPixels, cWidth, cHeight, cGamma)
+
+	var liqResult *C.liq_result
+	defer C.liq_result_destroy(liqResult)
+
+	liqError := C.liq_image_quantize(inputImage, handle, &liqResult)
+	if liqError != C.LIQ_OK {
+		log.Println("Quantization failed")
+		return nil, fmt.Errorf("c call to liq_image_quantize() failed with code %v", liqError)
+	}
+
+	pixelSize := imgRGBA.Bounds().Size().X * imgRGBA.Bounds().Size().Y
+
+	// alloc memory needed to liq_write_remapped_image
+	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
+	defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
+
+	// call c lib to write the new
+	C.liq_write_remapped_image(liqResult, inputImage, cRaw8BitPixels, C.ulong(pixelSize))
+
+	// get palette
+	cPalette := C.liq_get_palette(liqResult)
+
 	var outPalette color.Palette
-	// get liq_palette struct from c
 
-	// C.free(unsafe.Pointer(quantResult.Pixels))
-	palCount := uint(C.int(quantResult.palette.count))
-	log.Println(palCount)
-	// iterate the palette received from lib imagequant
+	palCount := uint(C.int(cPalette.count))
+
+	// iterate the palette received from c lib imagequant and
+	// create a go color palette.
 	for i := uint(0); i < palCount; i++ {
 		col := color.RGBA{
-			R: uint8(C.uint(quantResult.palette.entries[i].r)),
-			G: uint8(C.uint(quantResult.palette.entries[i].g)),
-			B: uint8(C.uint(quantResult.palette.entries[i].b)),
-			A: uint8(C.uint(quantResult.palette.entries[i].a)),
+			R: uint8(C.uint(cPalette.entries[i].r)),
+			G: uint8(C.uint(cPalette.entries[i].g)),
+			B: uint8(C.uint(cPalette.entries[i].b)),
+			A: uint8(C.uint(cPalette.entries[i].a)),
 		}
 		outPalette = append(outPalette, col)
 	}
 
-	// create new palette image
+	// create new go palette image
 	pImg := image.NewPaletted(imgRGBA.Rect, outPalette)
 
-	// copy unsigned chars from lib imagequant into go []uint8
-	pImg.Pix = C.GoBytes(unsafe.Pointer(quantResult.pixels), C.int(quantResult.size))
-
-	// free C alloc
-	// C.destroyImgQuant(quantResult)
+	// copy unsigned chars from c lib imagequant alloc memory into go []uint8
+	pImg.Pix = C.GoBytes(cRaw8BitPixels, C.int(pixelSize))
 
 	return pImg, nil
 }
 
-// ImageToRGBA returns RGBA having Pix []uint8
+// ImageToRGBA returns RGBA image.
 func ImageToRGBA(src image.Image) *image.RGBA {
 
 	// No conversion needed if image is an *image.RGBA.
@@ -106,6 +115,7 @@ func ImageToRGBA(src image.Image) *image.RGBA {
 	return dst
 }
 
+/**
 // Get the bi-dimensional pixel array
 func getPixels(img image.Image) ([][]Pixel, error) {
 
@@ -136,12 +146,4 @@ type Pixel struct {
 	B int
 	A int
 }
-
-// Read an image file.
-func Read(path string) ([]byte, error) {
-	return ioutil.ReadFile(path)
-}
-
-func Write(path string, data []byte) error {
-	return ioutil.WriteFile(path, data, fs.FileMode(0640))
-}
+*/

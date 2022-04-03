@@ -56,24 +56,30 @@ func main() {
 		return
 	}
 
-	img, _, errDecode := Decode(&imageBuff)
+	img, imgType, errDecode := Decode(&imageBuff)
 
 	if errDecode != nil {
 		log.Println(err)
 		return
 	}
 
+	switch imgType {
+	case "gif":
+
+	}
+
 	rgbaImg := quant.ImageToRGBA(img)
-	fmt.Printf("raw pixels size:%d\n", len(rgbaImg.Pix))
-	rgbaQuantImg, errQuant := quant.Quant(rgbaImg, 0)
+	qImg, errQuant := quant.Run(rgbaImg, 0)
+	// fmt.Printf("raw pixels size:%d\n", len(qImg.Pix))
+	//rgbaQuantImg, errQuant := quant.Quant(rgbaImg, 0)
 	if errQuant != nil {
 		log.Println(errQuant)
 		return
 	}
 
-	out, errPng := Encode(rgbaQuantImg, "png")
-	if errPng != nil {
-		log.Println(errPng)
+	out, errEncode := Encode(qImg, imgType)
+	if errEncode != nil {
+		log.Println(errEncode)
 	}
 
 	_ = Write(*imageDstPath, out)
