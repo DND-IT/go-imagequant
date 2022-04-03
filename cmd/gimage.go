@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	ErrImageBufferPtrIsNil        = errors.New("image byte buffer pointer can not be nil")
-	ErrImagePointerIsNil          = errors.New("image struct pointer can not be nil")
-	ErrImageOperationNotSupported = errors.New("image operation not supported")
+	ErrImageBufferPtrIsNil = errors.New("image byte buffer pointer can not be nil")
+	// ErrImagePointerIsNil          = errors.New("image struct pointer can not be nil")
+	// ErrImageOperationNotSupported = errors.New("image operation not supported")
 )
 
 // DecodeConfig is a wrapper for image.DecodeConfig().
@@ -33,6 +33,7 @@ func Decode(buffer *[]byte) (image.Image, string, error) {
 	return image.Decode(r)
 }
 
+/*
 func DecodeAllGIF(buffer *[]byte) (*gif.GIF, error) {
 	if buffer == nil {
 		return nil, ErrImageBufferPtrIsNil
@@ -43,7 +44,7 @@ func DecodeAllGIF(buffer *[]byte) (*gif.GIF, error) {
 		return nil, err
 	}
 	return g, nil
-}
+} */
 
 // Encode is a wrapper for various image encoder.
 func Encode(img image.Image, imageTypeName string) ([]byte, error) {

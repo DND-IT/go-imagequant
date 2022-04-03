@@ -1,6 +1,5 @@
 package imagequant
 
-import "C"
 import (
 	"fmt"
 	"image"
@@ -8,9 +7,6 @@ import (
 	"log"
 	"unsafe"
 )
-
-//
-// https://gist.github.com/zchee/b9c99695463d8902cd33
 
 /*
 #cgo CFLAGS: -I.

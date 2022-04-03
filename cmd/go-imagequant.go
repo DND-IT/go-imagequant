@@ -19,8 +19,14 @@ import (
 func main() {
 	imageSrcPath := flag.String("src", "", "src image path")
 	imageDstPath := flag.String("dst", "", "dst image path")
+	showLibImageQuantVersion := flag.Bool("showLibImageQuantVersion", false, "show lib image quant version and exit")
 
 	flag.Parse()
+
+	if *showLibImageQuantVersion {
+		fmt.Println(quant.GetLiqVersion())
+		return
+	}
 
 	if *imageSrcPath == "" {
 		fmt.Println("no src image")
@@ -31,10 +37,6 @@ func main() {
 		fmt.Println("no dst image")
 		return
 	}
-
-	// fmt.Println(quant.Ping())
-	liqVersion := quant.GetLiqVersion()
-	log.Printf("using libimagequant version %d\n", liqVersion)
 
 	imageBuff, err := Read(*imageSrcPath)
 
