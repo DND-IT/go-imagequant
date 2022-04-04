@@ -19,6 +19,11 @@ import (
 func main() {
 	imageSrcPath := flag.String("src", "", "src image path")
 	imageDstPath := flag.String("dst", "", "dst image path")
+	speed := flag.Uint("speed", quant.DefaultSpeed, "speed to to use")
+	gamma := flag.Float64("gamma", 0, "gamma")
+	minQuality := flag.Uint("min.quality", 0, "min allowed quality (default 0)")
+	maxQuality := flag.Uint("max.quality", 100, "min allowed quality")
+
 	showLibImageQuantVersion := flag.Bool("showLibImageQuantVersion", false, "show lib image quant version and exit")
 
 	flag.Parse()
@@ -30,11 +35,13 @@ func main() {
 
 	if *imageSrcPath == "" {
 		fmt.Println("no src image")
+		flag.PrintDefaults()
 		return
 	}
 
 	if *imageDstPath == "" {
 		fmt.Println("no dst image")
+		flag.PrintDefaults()
 		return
 	}
 
@@ -65,13 +72,19 @@ func main() {
 		return
 	}
 
-	switch imgType {
+	/* switch imgType {
 	case "gif":
 
+	} */
+
+	q, qErr := quant.New(img, *gamma, *minQuality, *maxQuality, *speed)
+
+	if qErr != nil {
+		log.Println(qErr)
+		return
 	}
 
-	rgbaImg := quant.ImageToRGBA(img)
-	qImg, errQuant := quant.Run(rgbaImg, 0)
+	qImg, errQuant := q.Run()
 	// fmt.Printf("raw pixels size:%d\n", len(qImg.Pix))
 	//rgbaQuantImg, errQuant := quant.Quant(rgbaImg, 0)
 	if errQuant != nil {

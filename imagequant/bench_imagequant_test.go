@@ -28,7 +28,10 @@ func BenchmarkRun(b *testing.B) {
 		b.Fatal(errDecode)
 	}
 
-	rgbaBenchImage := imagequant.ImageToRGBA(img)
+	q, errQ := imagequant.New(img, 0, 0, 100, imagequant.DefaultSpeed)
+	if errQ != nil {
+		b.Fatal(errQ)
+	}
 
 	concurrencyLevels := []int{5, 10, 20, 50}
 	for _, clients := range concurrencyLevels {
@@ -39,7 +42,7 @@ func BenchmarkRun(b *testing.B) {
 				wg.Add(1)
 				go func() {
 					// b.Log(clients, n)
-					_, err := imagequant.Run(rgbaBenchImage, 0)
+					_, err := q.Run()
 					if err != nil {
 						b.Error(err)
 					}

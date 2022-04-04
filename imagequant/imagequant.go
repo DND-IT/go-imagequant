@@ -1,10 +1,10 @@
 package imagequant
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
-	"log"
 	"unsafe"
 )
 
@@ -21,20 +21,68 @@ import (
 	"image/draw"
 )
 
+const (
+	DefaultSpeed      = 4
+	DefaultMinQuality = 0
+	DefaultMaxQuality = 100
+)
+
+type QImg struct {
+	Img        image.Image
+	ImgRGBA    *image.RGBA
+	Gamma      float64
+	MinQuality uint // default 0
+	MaxQuality uint // default 100
+	Speed      uint // range allowed between 1 and 10, default is 4
+}
+
 // GetLiqVersion returns version if libimagequant used.
 func GetLiqVersion() int {
 	return int(C.int(C.liq_version()))
 }
 
-// Run call c lib imagequant functions needed for quantize an RGBA image.
-func Run(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
+func New(img image.Image, gamma float64, minQuality, maxQuality, speed uint) (*QImg, error) {
 
-	if imgRGBA == nil {
+	// validate
+	if minQuality > maxQuality {
+		return nil, errors.New("min quality can not be bigger than max quality")
+	}
+
+	if maxQuality > 100 {
+		return nil, errors.New("max quality allowed is 100")
+	}
+
+	if speed < 1 {
+		return nil, errors.New("min allowed speed is 1")
+	}
+
+	if speed > 10 {
+		return nil, errors.New("max allowed speed is 10")
+	}
+
+	q := QImg{
+		Img:        img,
+		ImgRGBA:    nil,
+		Gamma:      gamma,
+		MinQuality: 0,
+		MaxQuality: 100,
+		Speed:      4,
+	}
+
+	q.ImgRGBA = ImageToRGBA(img)
+
+	return &q, nil
+}
+
+// Run call c lib imagequant functions needed for quantize an RGBA image.
+func (q *QImg) Run() (image.Image, error) {
+
+	if q.ImgRGBA == nil {
 		return nil, fmt.Errorf("can not quant nil image")
 	}
 
 	// get ptr for first slice item
-	pixelPtr := &imgRGBA.Pix[0]
+	pixelPtr := &q.ImgRGBA.Pix[0]
 	// create unsafe unsigned char pointer needed for C
 	ptrToRawRGBAPixels := (*C.uchar)(unsafe.Pointer(pixelPtr))
 	// defer C.free((*C.uchar)(unsafe.Pointer(ptrToRawRGBAPixels)))
@@ -43,23 +91,34 @@ func Run(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
 	handle := C.liq_attr_create()
 	defer C.liq_attr_destroy_wrapper(handle)
 
+	liqError := C.liq_set_speed(handle, C.int(q.Speed))
+	if liqError != C.LIQ_OK {
+		return nil, fmt.Errorf("c call to liq_set_speed() failed with code %v", liqError)
+	}
+
+	if q.MaxQuality != DefaultMaxQuality || q.MinQuality != DefaultMinQuality {
+		liqError = C.liq_set_quality(handle, C.int(q.MinQuality), C.int(q.MaxQuality))
+		if liqError != C.LIQ_OK {
+			return nil, fmt.Errorf("c call to liq_set_speed() failed with code %v", liqError)
+		}
+	}
+
 	// liq_image *input_image = liq_image_create_rgba(handle, raw_rgba_pixels, (int) width, (int) height, gamma);
-	cWidth := C.int(imgRGBA.Bounds().Size().X)
-	cHeight := C.int(imgRGBA.Bounds().Size().Y)
-	cGamma := C.double(gamma)
+	cWidth := C.int(q.ImgRGBA.Bounds().Size().X)
+	cHeight := C.int(q.ImgRGBA.Bounds().Size().Y)
+	cGamma := C.double(q.Gamma)
 
 	inputImage := C.liq_image_create_rgba_wrapper(handle, ptrToRawRGBAPixels, cWidth, cHeight, cGamma)
 
 	var liqResult *C.liq_result
 	defer C.liq_result_destroy(liqResult)
 
-	liqError := C.liq_image_quantize(inputImage, handle, &liqResult)
+	liqError = C.liq_image_quantize(inputImage, handle, &liqResult)
 	if liqError != C.LIQ_OK {
-		log.Println("Quantization failed")
 		return nil, fmt.Errorf("c call to liq_image_quantize() failed with code %v", liqError)
 	}
 
-	pixelSize := imgRGBA.Bounds().Size().X * imgRGBA.Bounds().Size().Y
+	pixelSize := q.ImgRGBA.Bounds().Size().X * q.ImgRGBA.Bounds().Size().Y
 
 	// alloc memory needed to liq_write_remapped_image
 	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
@@ -88,12 +147,12 @@ func Run(imgRGBA *image.RGBA, gamma float64) (palImg image.Image, err error) {
 	}
 
 	// create new go palette image
-	pImg := image.NewPaletted(imgRGBA.Rect, outPalette)
+	qImg := image.NewPaletted(q.ImgRGBA.Rect, outPalette)
 
 	// copy unsigned chars from c lib imagequant alloc memory into go []uint8
-	pImg.Pix = C.GoBytes(cRaw8BitPixels, C.int(pixelSize))
+	qImg.Pix = C.GoBytes(cRaw8BitPixels, C.int(pixelSize))
 
-	return pImg, nil
+	return qImg, nil
 }
 
 // ImageToRGBA returns RGBA image.
