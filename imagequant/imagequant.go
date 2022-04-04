@@ -64,9 +64,9 @@ func New(img image.Image, gamma float64, minQuality, maxQuality, speed uint) (*Q
 		Img:        img,
 		ImgRGBA:    nil,
 		Gamma:      gamma,
-		MinQuality: 0,
-		MaxQuality: 100,
-		Speed:      4,
+		MinQuality: minQuality,
+		MaxQuality: maxQuality,
+		Speed:      speed,
 	}
 
 	q.ImgRGBA = ImageToRGBA(img)
