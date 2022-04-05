@@ -4,3 +4,6 @@ This package wraps some (not all) functionality of
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working c lib.
 
+### creating a local docker image to build the command line binary.
+
+
