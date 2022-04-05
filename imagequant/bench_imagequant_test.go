@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"go-imagequant/imagequant"
+	"github.com/DND-IT/go-imagequant/imagequant"
 )
 
 func BenchmarkRun(b *testing.B) {
