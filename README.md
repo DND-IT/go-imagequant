@@ -1,7 +1,8 @@
 # go-imagequant
 
 This package wraps some (not all) functionality of
-[libimagequant](https://pngquant.org/lib/).
+[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.0.0 rust based library. 
+
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working
 c lib.
@@ -10,7 +11,7 @@ See [cmd/go-imagequant.go](cmd/go-imagequant.go) how to use this package.
 
 ## Using docker to use the command line binary.
 
-The example cli binary supports reading and writing png, jpeg and gif (non animated) and serves as an example how to use this package.
+The example cli binary supports reading and writing png, jpeg and gif (non-animated) and serves as an example how to use this package.
 
 See docker/alpine/Dockerfile for details. 
 
