@@ -2,6 +2,7 @@
 
 This package wraps some (not all) functionality of
 [libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.0.0 rust based library. 
+Older version of libimagequant should also work, but will show different results. 
 
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working

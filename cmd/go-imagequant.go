@@ -13,7 +13,7 @@ import (
 
 	_ "golang.org/x/image/webp"
 
-	quant "go-imagequant/imagequant"
+	quant "github.com/DND-IT/go-imagequant/imagequant"
 )
 
 func main() {

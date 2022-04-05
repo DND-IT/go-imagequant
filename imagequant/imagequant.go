@@ -34,6 +34,7 @@ type QImg struct {
 	MinQuality uint // default 0
 	MaxQuality uint // default 100
 	Speed      uint // range allowed between 1 and 10, default is 4
+
 }
 
 // GetLiqVersion returns version if libimagequant used.
