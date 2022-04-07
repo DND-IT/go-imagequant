@@ -1,4 +1,4 @@
-.PHONY: all build bench docker-alpine docker-libimagequant help
+.PHONY: all build bench test docker-alpine docker-libimagequant help
 
 all: lint build ## test, lint and build application
 
@@ -10,6 +10,9 @@ build: ## Build cmd
 
 bench: ## Run bench
 	cd imagequant && go test -mod vendor -bench . -run=^$
+
+test: ## Run tests
+	go test -mod vendor ./...
 
 docker-alpine: ## create cmd as docker image
 	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest .
