@@ -84,5 +84,20 @@ copy ubuntu libs to /usr/local
 sudo cp -a lib/ubuntu/20.04/. /usr/local
 ```
 
-
-
+Ensure go-imagequant is using version 4.0.0 of the c lib:
+```
+cd cmd
+go run . -showLibImageQuantVersion
+```
+should show 40000. If you get another lower number you probably are using an ubuntu installed version.
+Check 
+```
+apt search libimagequant
+p   libimagequant-dev                                                               - palette quantization library (development files)
+p   libimagequant0                                                                  - palette quantization library
+```
+shows not i (installed). 
+Consider to remove libimagequant0 and libimagequant-dev by calling
+```
+apt purge libimagequant0 libimagequant-dev 
+```
