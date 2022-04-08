@@ -21,7 +21,7 @@ docker-cmd: ## create cmd as docker alpine based image
 docker-lib-ubuntu20.04-amd64: ## create ubuntu 20.04 lib artifacts
 	echo "creating ubuntu 20.04 lib artifacts ..."
 	rm -rf ./lib/ubuntu/20.04/* # cleanup old stuff
-	docker buildx build --platform linux/arm64 -f docker/create-ubuntu20.04-artifacts/Dockerfile --output type=local,dest=. .
+	docker buildx build --platform linux/amd64 -f docker/create-ubuntu20.04-artifacts/Dockerfile --output type=local,dest=. .
 
 
 docker-lib-alpine-arm64: ## create alpine 3.15 lib artifacts
