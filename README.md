@@ -74,6 +74,15 @@ Under ./lib/ you find the c lib of imagequant for alpine 3.15 and ubuntu 20.04.
 
 Copy all files into /usr/lib to enable for example daffy to run.
 
+## recreate c libs artifacts for ubuntu
+
+```make docker-lib-ubuntu20.04-amd64```
+
+copy ubuntu libs to /usr/local
+
+```
+sudo cp -a lib/ubuntu/20.04/. /usr/local
+```
 
 
 
