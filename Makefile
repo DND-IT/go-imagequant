@@ -1,4 +1,4 @@
-.PHONY: all build bench test docker-cmd docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64 help
+.PHONY: all build bench test docker-cmd docker-lib-ubuntu20.04-amd64 artifacts docker-lib-alpine-arm64 help
 
 all: lint build ## test, lint and build application
 artifacts: docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64
