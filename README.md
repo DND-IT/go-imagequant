@@ -101,3 +101,11 @@ Consider to remove libimagequant0 and libimagequant-dev by calling
 ```
 apt purge libimagequant0 libimagequant-dev 
 ```
+Also check your linker search paths:
+```
+ld --verbose | grep SEARCH_DIR | tr -s ' ;' \\012
+```
+You could also try to refresh your linker cache:
+```
+sudo ldconfig
+```
