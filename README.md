@@ -24,7 +24,7 @@ Requirements:
 call
 
 ```bash
-make docker-alpine
+make docker-cmd
 ```
 
 to create a local image. Check if image was created:
@@ -69,3 +69,11 @@ Converting a png assuming you got image ```benchmark_image_1.png``` in your curr
 ```
 docker run -v $PWD:/tmp go-imagequant -max.quality 75 -src /tmp/benchmark_image_1.png -dst /tmp/benchmark_image_1.docker.max40.png
 ```
+## using c libs 
+Under ./lib/ you find the c lib of imagequant for alpine 3.15 and ubuntu 20.04. 
+
+Copy all files into /usr/lib to enable for example daffy to run.
+
+
+
+

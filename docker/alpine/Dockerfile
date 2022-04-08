@@ -1,7 +1,7 @@
 FROM rust:alpine3.15 as rust
 LABEL stage=rust
 WORKDIR /build
-COPY ./docker/alpine-libimagequant/enable-world-repos.sh /root/
+COPY ./docker/alpine/enable-world-repos.sh /root/
 RUN /root/enable-world-repos.sh
 RUN apk update && \
                 apk upgrade && \

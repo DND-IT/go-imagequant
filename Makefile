@@ -1,6 +1,7 @@
-.PHONY: all build bench test docker-alpine docker-libimagequant help
+.PHONY: all build bench test docker-cmd docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64 help
 
 all: lint build ## test, lint and build application
+artifacts: docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64
 
 lint: ## Lint the project
 	golangci-lint --timeout 300s run ./...
@@ -14,11 +15,19 @@ bench: ## Run bench
 test: ## Run tests
 	go test -mod vendor ./...
 
-docker-alpine: ## create cmd as docker image
-	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest .
+docker-cmd: ## create cmd as docker alpine based image
+	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest --load .
 
-docker-libimagequant: ## create feed alpine image with libimagequant already installed
-	docker buildx build -f docker/alpine-libimagequant/Dockerfile --tag feed-alpine:1.16.12-alpine3.15 .
+docker-lib-ubuntu20.04-amd64: ## create ubuntu 20.04 lib artifacts
+	echo "creating ubuntu 20.04 lib artifacts ..."
+	rm -rf ./lib/ubuntu/20.04/* # cleanup old stuff
+	docker buildx build --platform linux/arm64 -f docker/create-ubuntu20.04-artifacts/Dockerfile --output type=local,dest=. .
+
+
+docker-lib-alpine-arm64: ## create alpine 3.15 lib artifacts
+	echo "creating alpine arm64 lib artifacts ..."
+	rm -rf lib/alpine/3.15/* # cleanup old stuff
+	docker buildx build --platform linux/arm64 -f docker/create-alpine-3.15-artifacts/Dockerfile --output type=local,dest=. .
 
 help: ## Print all possible targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {gsub("\\\\n",sprintf("\n%22c",""), $$2);printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
