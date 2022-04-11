@@ -130,6 +130,9 @@ func (q *QImg) Run() (image.Image, error) {
 
 	// get palette
 	cPalette := C.liq_get_palette(liqResult)
+	defer func() {
+		cPalette = nil
+	}()
 
 	var outPalette color.Palette
 
