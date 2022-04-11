@@ -86,9 +86,7 @@ func (q *QImg) Run() (image.Image, error) {
 	pixelPtr := &q.ImgRGBA.Pix[0]
 	// create unsafe unsigned char pointer needed for C
 	ptrToRawRGBAPixels := (*C.uchar)(unsafe.Pointer(pixelPtr))
-	// defer C.free((*C.uchar)(unsafe.Pointer(ptrToRawRGBAPixels)))
 
-	// liq_attr *handle = liq_attr_create();
 	handle := C.liq_attr_create()
 	defer C.liq_attr_destroy_wrapper(handle)
 
@@ -110,11 +108,13 @@ func (q *QImg) Run() (image.Image, error) {
 	cGamma := C.double(q.Gamma)
 
 	inputImage := C.liq_image_create_rgba_wrapper(handle, ptrToRawRGBAPixels, cWidth, cHeight, cGamma)
+	defer C.liq_image_destroy(inputImage)
 
 	var liqResult *C.liq_result
 	defer C.liq_result_destroy(liqResult)
 
 	liqError = C.liq_image_quantize(inputImage, handle, &liqResult)
+
 	if liqError != C.LIQ_OK {
 		return nil, fmt.Errorf("c call to liq_image_quantize() failed with code %v", liqError)
 	}

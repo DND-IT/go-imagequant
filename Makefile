@@ -10,7 +10,7 @@ build: ## Build cmd
 	cd cmd && CGO_ENABLED=1 go build -o go-imagequant .
 
 bench: ## Run bench
-	cd imagequant && go test -mod vendor -bench . -run=^$
+	cd imagequant && go test -mod vendor -bench . -benchmem -run=^$
 
 test: ## Run tests
 	go test -mod vendor ./...
