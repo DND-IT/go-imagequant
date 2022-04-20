@@ -39,11 +39,12 @@ func TestQualityRun(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 
-			r, err := processFile(urlList, i)
+			r, err := processFile(urlList[i], i)
 			if err != nil {
+				t.Log(err)
 				return
 			}
-			delta := r.calulateDelta()
+			delta := r.calculateDelta()
 
 			t.Logf("processing %s", urlList[i])
 
@@ -73,41 +74,38 @@ func TestQualityRun(t *testing.T) {
 
 }
 
-func processFile(urlList []string, i int) (*encodeResult, error) {
-	url := urlList[i]
+func processFile(url string, index int) (r *encodeResult, err error) {
 
 	// download image to local temp file and decode into image
-	fileIn, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", i))
-
+	fileIn, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", index))
 	if err != nil {
-		return nil, err
+		return
 	}
-	err = downloadFile(fileIn.Name(), url)
 
+	err = downloadFile(fileIn.Name(), url)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	inputImage, err := ioutil.ReadFile(fileIn.Name())
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	img, _, errDecode := image.Decode(bytes.NewReader(inputImage))
-	if errDecode != nil {
-		return nil, errDecode
+	img, _, err := image.Decode(bytes.NewReader(inputImage))
+	if err != nil {
+		return
 	}
 
 	// quantisation
-
-	q, errQ := imagequant.New(img, 0, 0, 100, imagequant.DefaultSpeed)
-	if errQ != nil {
-		return nil, errQ
+	q, err := imagequant.New(img, 0, 0, 100, imagequant.DefaultSpeed)
+	if err != nil {
+		return
 	}
 
-	quantImg, errR := q.Run()
-	if errR != nil {
-		return nil, errR
+	quantImg, err := q.Run()
+	if err != nil {
+		return
 	}
 
 	buff := bytes.NewBuffer([]byte{})
@@ -115,46 +113,43 @@ func processFile(urlList []string, i int) (*encodeResult, error) {
 	// encode as png and write to temp file
 	err = png.Encode(buff, quantImg)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	fileOut, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-out-*.png", i))
+	fileOut, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-out-*.png", index))
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	fw := bufio.NewWriter(fileOut)
+	_, err = fw.Write(buff.Bytes())
+	if err != nil {
+		return
+	}
 
-	fw.Write(buff.Bytes())
+	r = &encodeResult{OriginalSize: len(inputImage), QuantitizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantitizedFilename: fileOut.Name()}
 
-	r := &encodeResult{OriginalSize: len(inputImage), QuantitizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantitizedFilename: fileOut.Name()}
-
-	return r, nil
+	return
 }
 
-func readUrls() ([]string, error) {
+func readUrls() (urls []string, err error) {
 	f, err := os.OpenFile("./test/urls.txt", os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Fatalf("open file error: %v", err)
-		return nil, err
+		return
 	}
 	defer f.Close()
-
-	var urls []string
 
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		urls = append(urls, sc.Text())
 	}
-	if err := sc.Err(); err != nil {
+	if err = sc.Err(); err != nil {
 		log.Fatalf("scan file error: %v", err)
-		return nil, err
+		return
 	}
 
-	return urls, nil
+	return
 
 }
 
@@ -186,7 +181,7 @@ type encodeResult struct {
 	QuantitizedSize     int
 }
 
-func (m encodeResult) calulateDelta() (delta float64) {
+func (m encodeResult) calculateDelta() (delta float64) {
 
 	diff := float64(m.QuantitizedSize - m.OriginalSize)
 	delta = (diff / float64(m.OriginalSize)) * 100
