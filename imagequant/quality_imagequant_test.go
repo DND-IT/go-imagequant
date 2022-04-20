@@ -74,7 +74,7 @@ func TestQualityRun(t *testing.T) {
 
 }
 
-func processFile(url string, index int) (r *encodeResult, err error) {
+func processFile(url string, index int) (r *processFileResult, err error) {
 
 	// download image to local temp file and decode into image
 	fileIn, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", index))
@@ -127,7 +127,7 @@ func processFile(url string, index int) (r *encodeResult, err error) {
 		return
 	}
 
-	r = &encodeResult{OriginalSize: len(inputImage), QuantitizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantitizedFilename: fileOut.Name()}
+	r = &processFileResult{OriginalSize: len(inputImage), QuantitizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantitizedFilename: fileOut.Name()}
 
 	return
 }
@@ -174,14 +174,14 @@ func downloadFile(filepath string, url string) (err error) {
 	return
 }
 
-type encodeResult struct {
+type processFileResult struct {
 	OriginalSize        int
 	OriginalFilename    string
 	QuantitizedFilename string
 	QuantitizedSize     int
 }
 
-func (m encodeResult) calculateDelta() (delta float64) {
+func (m processFileResult) calculateDelta() (delta float64) {
 
 	diff := float64(m.QuantitizedSize - m.OriginalSize)
 	delta = (diff / float64(m.OriginalSize)) * 100
