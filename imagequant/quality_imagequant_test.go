@@ -27,7 +27,7 @@ func TestQualityRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var deltas = []float64{}
+	var deltas []float64
 
 	// set to true for visual inspection
 	var keepAllFiles = false
@@ -46,15 +46,15 @@ func TestQualityRun(t *testing.T) {
 			}
 			delta := r.calculateDelta()
 
-			t.Logf("processing %s", urlList[i])
+			t.Logf("processing %d: %s", i, urlList[i])
 
 			// keep critical images - otherwise remove
 			if delta > 0 {
 				t.Logf("file %s got bigger: %f%%", r.QuantitizedFilename, delta)
 			} else {
 				if !keepAllFiles {
-					os.Remove(r.OriginalFilename)
-					os.Remove(r.QuantitizedFilename)
+					_ = os.Remove(r.OriginalFilename)
+					_ = os.Remove(r.QuantitizedFilename)
 				}
 			}
 			deltas = append(deltas, delta)
@@ -77,7 +77,8 @@ func TestQualityRun(t *testing.T) {
 func processFile(url string, index int) (r *processFileResult, err error) {
 
 	// download image to local temp file and decode into image
-	fileIn, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", index))
+	var fileIn, fileOut *os.File
+	fileIn, err = ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", index))
 	if err != nil {
 		return
 	}
@@ -98,13 +99,13 @@ func processFile(url string, index int) (r *processFileResult, err error) {
 	}
 
 	// quantisation
-	q, err := imagequant.New(img, 0, 0, 100, imagequant.DefaultSpeed)
-	if err != nil {
+	q, errQ := imagequant.New(img, 0, 0, 100, imagequant.DefaultSpeed)
+	if errQ != nil {
 		return
 	}
 
-	quantImg, err := q.Run()
-	if err != nil {
+	quantImg, errR := q.Run()
+	if errR != nil {
 		return
 	}
 
@@ -116,7 +117,7 @@ func processFile(url string, index int) (r *processFileResult, err error) {
 		return
 	}
 
-	fileOut, err := ioutil.TempFile("/tmp", fmt.Sprintf("image%v-out-*.png", index))
+	fileOut, err = ioutil.TempFile("/tmp", fmt.Sprintf("image%v-out-*.png", index))
 	if err != nil {
 		return
 	}

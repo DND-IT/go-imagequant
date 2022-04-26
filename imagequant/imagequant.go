@@ -76,11 +76,18 @@ func New(img image.Image, gamma float64, minQuality, maxQuality, speed uint) (*Q
 }
 
 // Run call c lib imagequant functions needed for quantize an RGBA image.
+// Defer is used to clean up resources in Last in first out (LIFO) manner.
 func (q *QImg) Run() (image.Image, error) {
 
 	if q.ImgRGBA == nil {
 		return nil, fmt.Errorf("can not quant nil image")
 	}
+
+	pixelSize := q.ImgRGBA.Bounds().Size().X * q.ImgRGBA.Bounds().Size().Y
+
+	// alloc memory needed to liq_write_remapped_image
+	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
+	defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
 
 	// get ptr for first slice item
 	pixelPtr := &q.ImgRGBA.Pix[0]
@@ -118,12 +125,6 @@ func (q *QImg) Run() (image.Image, error) {
 	if liqError != C.LIQ_OK {
 		return nil, fmt.Errorf("c call to liq_image_quantize() failed with code %v", liqError)
 	}
-
-	pixelSize := q.ImgRGBA.Bounds().Size().X * q.ImgRGBA.Bounds().Size().Y
-
-	// alloc memory needed to liq_write_remapped_image
-	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
-	defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
 
 	// call c lib to write the new
 	C.liq_write_remapped_image(liqResult, inputImage, cRaw8BitPixels, C.ulong(pixelSize))
