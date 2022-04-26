@@ -1,4 +1,4 @@
-.PHONY: all build bench test docker-cmd docker-lib-ubuntu20.04-amd64 artifacts docker-lib-alpine-arm64 help
+.PHONY: all build bench test docker-cmd artifacts docker-lib-ubuntu20_04-amd64 docker-lib-alpine-arm64 help
 
 all: lint build ## test, lint and build application
 artifacts: docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64
@@ -18,7 +18,7 @@ test: ## Run tests
 docker-cmd: ## create cmd as docker alpine based image
 	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest --load .
 
-docker-lib-ubuntu20.04-amd64: ## create ubuntu 20.04 lib artifacts
+docker-lib-ubuntu20_04-amd64: ## create ubuntu 20.04 lib artifacts
 	echo "creating ubuntu 20.04 lib artifacts ..."
 	rm -rf ./lib/ubuntu/20.04/* # cleanup old stuff
 	docker buildx build --platform linux/amd64 -f docker/create-ubuntu20.04-artifacts/Dockerfile --output type=local,dest=. .
