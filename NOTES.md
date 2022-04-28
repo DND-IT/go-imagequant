@@ -15,4 +15,3 @@ Some helpful links in relation to cgo and lib imagequant:
 ### OSX 
 on osx libs are needed at /usr/local/lib.
 
-
