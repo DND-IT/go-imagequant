@@ -87,7 +87,7 @@ func (q *QImg) Run() (image.Image, error) {
 
 	// alloc memory needed to liq_write_remapped_image
 	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
-	defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
+	// defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
 
 	// get ptr for first slice item
 	pixelPtr := &q.ImgRGBA.Pix[0]
@@ -95,7 +95,6 @@ func (q *QImg) Run() (image.Image, error) {
 	ptrToRawRGBAPixels := (*C.uchar)(unsafe.Pointer(pixelPtr))
 
 	handle := C.liq_attr_create()
-	defer C.liq_attr_destroy_wrapper(handle)
 
 	liqError := C.liq_set_speed(handle, C.int(q.Speed))
 	if liqError != C.LIQ_OK {
@@ -105,6 +104,8 @@ func (q *QImg) Run() (image.Image, error) {
 	if q.MaxQuality != DefaultMaxQuality || q.MinQuality != DefaultMinQuality {
 		liqError = C.liq_set_quality(handle, C.int(q.MinQuality), C.int(q.MaxQuality))
 		if liqError != C.LIQ_OK {
+			C.liq_attr_destroy(handle)
+			C.free(cRaw8BitPixels)
 			return nil, fmt.Errorf("c call to liq_set_speed() failed with code %v", liqError)
 		}
 	}
@@ -115,14 +116,17 @@ func (q *QImg) Run() (image.Image, error) {
 	cGamma := C.double(q.Gamma)
 
 	inputImage := C.liq_image_create_rgba_wrapper(handle, ptrToRawRGBAPixels, cWidth, cHeight, cGamma)
-	defer C.liq_image_destroy(inputImage)
 
 	var liqResult *C.liq_result
-	defer C.liq_result_destroy(liqResult)
 
 	liqError = C.liq_image_quantize(inputImage, handle, &liqResult)
 
 	if liqError != C.LIQ_OK {
+		// release C memory
+		C.liq_result_destroy(liqResult)
+		C.liq_image_destroy(inputImage)
+		C.liq_attr_destroy(handle)
+		C.free(cRaw8BitPixels)
 		return nil, fmt.Errorf("c call to liq_image_quantize() failed with code %v", liqError)
 	}
 
@@ -154,6 +158,12 @@ func (q *QImg) Run() (image.Image, error) {
 	// copy unsigned chars from c lib imagequant alloc memory into go []uint8
 	qImg.Pix = C.GoBytes(cRaw8BitPixels, C.int(pixelSize))
 
+	// release C memory
+	C.liq_result_destroy(liqResult)
+	C.liq_image_destroy(inputImage)
+	C.liq_attr_destroy(handle)
+	C.free(unsafe.Pointer(cRaw8BitPixels))
+
 	return qImg, nil
 }
 
@@ -171,36 +181,3 @@ func ImageToRGBA(src image.Image) *image.RGBA {
 	draw.Draw(dst, dst.Bounds(), src, b.Min, draw.Src)
 	return dst
 }
-
-/**
-// Get the bi-dimensional pixel array
-func getPixels(img image.Image) ([][]Pixel, error) {
-
-	bounds := img.Bounds()
-	width, height := bounds.Max.X, bounds.Max.Y
-
-	var pixels [][]Pixel
-	for y := 0; y < height; y++ {
-		var row []Pixel
-		for x := 0; x < width; x++ {
-			row = append(row, rgbaToPixel(img.At(x, y).RGBA()))
-		}
-		pixels = append(pixels, row)
-	}
-
-	return pixels, nil
-}
-
-// img.At(x, y).RGBA() returns four uint32 values; we want a Pixel
-func rgbaToPixel(r uint32, g uint32, b uint32, a uint32) Pixel {
-	return Pixel{int(r / 257), int(g / 257), int(b / 257), int(a / 257)}
-}
-
-// Pixel struct example
-type Pixel struct {
-	R int
-	G int
-	B int
-	A int
-}
-*/

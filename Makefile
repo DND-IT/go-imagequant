@@ -13,7 +13,7 @@ bench: ## Run bench
 	cd imagequant && go test -mod vendor -bench . -benchmem -run=^$
 
 test: ## Run tests
-	go test -mod vendor ./...
+	go test -v -mod vendor ./...
 
 docker-cmd: ## create cmd as docker alpine based image
 	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest --load .

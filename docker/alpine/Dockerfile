@@ -43,7 +43,7 @@ ENV TERM linux
 # add needed packages
 RUN /bin/sh -c 'apk update && \
     apk upgrade && \
-    apk add bash curl bind-tools sudo libwebp libgcc  && \
+    apk add bash curl bind-tools sudo libwebp libgcc bcc-tools bcc-doc && \
     mkdir -p /opt/bin'
 
 
