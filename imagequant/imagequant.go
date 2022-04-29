@@ -87,7 +87,6 @@ func (q *QImg) Run() (image.Image, error) {
 
 	// alloc memory needed to liq_write_remapped_image
 	cRaw8BitPixels := C.CBytes(make([]uint8, pixelSize))
-	// defer C.free(cRaw8BitPixels) // be sure to release C alloc memory
 
 	// get ptr for first slice item
 	pixelPtr := &q.ImgRGBA.Pix[0]
@@ -98,6 +97,8 @@ func (q *QImg) Run() (image.Image, error) {
 
 	liqError := C.liq_set_speed(handle, C.int(q.Speed))
 	if liqError != C.LIQ_OK {
+		C.liq_attr_destroy(handle)
+		C.free(cRaw8BitPixels)
 		return nil, fmt.Errorf("c call to liq_set_speed() failed with code %v", liqError)
 	}
 
