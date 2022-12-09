@@ -1,7 +1,7 @@
 # go-imagequant
 
 This package wraps some (not all) functionality of
-[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.0.0 rust based library.
+[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.0.1 rust based library.
 Older version of libimagequant should also work, but will show different results.
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working
@@ -86,7 +86,7 @@ copy ubuntu libs to /usr/local
 sudo cp -a lib/ubuntu/20.04/. /usr/local
 ```
 
-Ensure go-imagequant is using version 4.0.0 of the c lib:
+Ensure go-imagequant is using version 4.0.1 of the c lib:
 
 ```
 cd cmd
