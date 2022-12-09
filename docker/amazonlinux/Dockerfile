@@ -2,11 +2,13 @@ FROM amazonlinux:2 as rust
 LABEL stage=rust
 WORKDIR /build
 RUN yum update -y
-RUN amazon-linux-extras enable rust1
-RUN yum install git rust cargo  openssl-devel -y
-RUN cargo install cargo-c
-RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.0.1
-RUN /bin/sh -c 'cd libimagequant/imagequant-sys && \
+RUN yum install gcc openssl-devel git -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
+RUN /bin/sh -c 'export PATH=$PATH:~/.cargo/bin/ && \
+    cargo install cargo-c'
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.0.4
+RUN /bin/sh -c 'export PATH=$PATH:~/.cargo/bin/ && \
+    cd libimagequant/imagequant-sys && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=. '
 
 # compile

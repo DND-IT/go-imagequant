@@ -1,0 +1,22 @@
+name: Docker Image Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ["self-hosted", "linux", "x64", "ondemand"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Compile Amazon Linux 2 Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/amazonlinux/Dockerfile
+          push: false
+          load: false
