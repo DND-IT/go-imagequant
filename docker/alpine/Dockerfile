@@ -1,16 +1,15 @@
 FROM rust:alpine3.15 as rust
 LABEL stage=rust
 WORKDIR /build
-COPY ./docker/alpine/enable-world-repos.sh /root/
-RUN /root/enable-world-repos.sh
 RUN apk update && \
-                apk upgrade && \
-                apk add bash curl bind-tools sudo build-base git musl-dev libressl-dev cargo-c && \
-                git clone https://github.com/ImageOptim/libimagequant.git --branch 4.0.0
-
-RUN /bin/sh -c 'cd libimagequant/imagequant-sys && \
-                CFLAGS=-mno-outline-atomics cargo cinstall --destdir=. '
-
+    apk upgrade && \
+    apk add bash curl bind-tools sudo build-base git musl-dev libressl-dev
+RUN /bin/sh -c 'export PATH=$PATH:~/.cargo/bin/ && \
+    cargo install cargo-c'
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.0.0
+RUN /bin/sh -c 'export PATH=$PATH:~/.cargo/bin/ && \
+    cd libimagequant/imagequant-sys && \
+    CFLAGS=-mno-outline-atomics cargo cinstall --destdir=. '
 
 # compile
 FROM golang:1.16.12-alpine3.15 as builder
