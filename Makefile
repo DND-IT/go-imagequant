@@ -1,7 +1,7 @@
-.PHONY: all build bench test docker-cmd artifacts docker-lib-ubuntu20_04-amd64 docker-lib-alpine-arm64 help
+.PHONY: all build bench test docker-cmd artifacts docker-lib-ubuntu-amd64 docker-lib-alpine-arm64 help
 
 all: lint build ## test, lint and build application
-artifacts: docker-lib-ubuntu20.04-amd64 docker-lib-alpine-arm64
+artifacts: docker-lib-ubuntu-amd64 docker-lib-alpine-arm64
 
 lint: ## Lint the project
 	golangci-lint --timeout 300s run ./...
@@ -18,17 +18,17 @@ test: ## Run tests
 docker-cmd: ## create cmd as docker alpine based image
 	docker buildx build -f docker/amazonlinux/Dockerfile --tag go-imagequant:latest --load .
 
-docker-lib-ubuntu20_04-amd64: ## create ubuntu 20.04 lib artifacts
-	echo "creating ubuntu 20.04 lib artifacts ..."
-	rm -rf ./lib/ubuntu/20.04/* # cleanup old stuff
-	docker buildx build --platform linux/amd64 -f docker/create-ubuntu20.04-artifacts/Dockerfile --output type=local,dest=. .
+docker-lib-ubuntu-amd64: ## create ubuntu lib artifacts
+	echo "creating ubuntu  lib artifacts ..."
+	rm -rf ./lib/ubuntu/22.04/* # cleanup old stuff
+	docker buildx build --platform linux/amd64 -f docker/create-ubuntu-artifacts/Dockerfile --output type=local,dest=. .
 
 
 # alpine build is broken because missing symbol getauxval in alpine libc
-#docker-lib-alpine-arm64: ## create alpine 3.15 lib artifacts
-#	echo "creating alpine arm64 lib artifacts ..."
-#	rm -rf lib/alpine/3.15/* # cleanup old stuff
-#	docker buildx build --platform linux/arm64 -f docker/create-alpine-3.15-artifacts/Dockerfile --output type=local,dest=. .
+docker-lib-alpine-arm64: ## create alpine artifacts
+	echo "creating alpine arm64 lib artifacts ..."
+	rm -rf lib/alpine/3.17/* # cleanup old stuff
+	docker buildx build --platform linux/arm64 -f docker/create-alpine-3.17-artifacts/Dockerfile --output type=local,dest=. .
 
 
 

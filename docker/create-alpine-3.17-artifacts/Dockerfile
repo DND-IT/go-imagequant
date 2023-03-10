@@ -6,7 +6,7 @@ RUN /root/enable-world-repos.sh
 RUN apk update && \
     apk upgrade && \
     apk add rust cargo cargo-c bash curl bind-tools sudo build-base git musl-dev libressl-dev && \
-    git clone https://github.com/ImageOptim/libimagequant.git --branch 4.0.1
+    git clone https://github.com/ImageOptim/libimagequant.git --branch 4.1.1
 
 RUN /bin/sh -c 'cd libimagequant/imagequant-sys && \
     cargo cinstall --destdir=. '

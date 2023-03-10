@@ -1,7 +1,7 @@
 # go-imagequant
 
 This package wraps some (not all) functionality of
-[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.0.1 rust based library.
+[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.1.1 rust based library.
 Older version of libimagequant should also work, but will show different results.
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working
@@ -72,21 +72,21 @@ docker run -v $PWD:/tmp go-imagequant -max.quality 75 -src /tmp/imagequant/test/
 
 ## using c libs
 
-Under ./lib/ you find the c lib of imagequant for alpine 3.15 and ubuntu 20.04.
+Under ./lib/ you find the c lib of imagequant for alpine and ubuntu.
 
 Copy all files into /usr/lib to enable for example daffy to run.
 
 ## recreate c libs artifacts for ubuntu
 
-`make docker-lib-ubuntu20.04-amd64`
+`make docker-lib-ubuntu-amd64`
 
 copy ubuntu libs to /usr/local
 
 ```
-sudo cp -a lib/ubuntu/20.04/. /usr/local
+sudo cp -a lib/ubuntu/22.04/. /usr/local
 ```
 
-Ensure go-imagequant is using version 4.0.1 of the c lib:
+Ensure go-imagequant is using version 4.1.1 of the c lib:
 
 ```
 cd cmd
