@@ -7,7 +7,7 @@ RUN apt-get update -y  && \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
 RUN /bin/bash -c 'source "$HOME/.cargo/env" && \
     cargo install cargo-c'
-RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.1.1
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.0
 RUN /bin/bash -c 'source "$HOME/.cargo/env" && \
     cd libimagequant/imagequant-sys && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=. '
