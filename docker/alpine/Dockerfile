@@ -1,16 +1,3 @@
-FROM alpine:3.18  as rust
-LABEL stage=rust
-WORKDIR /build
-COPY ./docker/alpine/enable-world-repos.sh /root/
-RUN /root/enable-world-repos.sh
-RUN apk update && \
-    apk upgrade && \
-    apk add rust cargo cargo-c bash curl bind-tools sudo build-base git musl-dev libressl-dev && \
-    git clone https://github.com/ImageOptim/libimagequant.git --branch 4.1.1
-
-RUN /bin/sh -c 'cd libimagequant/imagequant-sys && \
-    cargo cinstall --destdir=. '
-
 # compile
 FROM golang:1.20.5-alpine3.18 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
@@ -23,9 +10,8 @@ RUN set -eux; \
     musl-dev \
     openssl \
     git \
-    libwebp-dev
-
-COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/ /usr/local/
+    libwebp-dev \
+    libimagequant-dev
 
 WORKDIR /build
 COPY . .
@@ -42,11 +28,10 @@ ENV TERM linux
 # add needed packages
 RUN /bin/sh -c 'apk update && \
     apk upgrade && \
-    apk add bash curl bind-tools sudo libwebp libgcc bcc-tools bcc-doc && \
+    apk add bash curl bind-tools sudo libwebp libimagequant libgcc bcc-tools bcc-doc  && \
     mkdir -p /opt/bin'
 
 
-COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/ /usr/local/
 
 WORKDIR /opt/bin
 COPY --from=builder /build/cmd/go-imagequant .
