@@ -1,4 +1,4 @@
-FROM alpine:3.17  as rust
+FROM alpine:3.18  as rust
 LABEL stage=rust
 WORKDIR /build
 COPY ./docker/alpine/enable-world-repos.sh /root/
@@ -12,7 +12,7 @@ RUN /bin/sh -c 'cd libimagequant/imagequant-sys && \
     cargo cinstall --destdir=. '
 
 # compile
-FROM golang:1.19-alpine3.17 as builder
+FROM golang:1.20.5-alpine3.18 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 

@@ -27,8 +27,8 @@ docker-lib-ubuntu-amd64: ## create ubuntu lib artifacts
 # alpine build is broken because missing symbol getauxval in alpine libc
 docker-lib-alpine-arm64: ## create alpine artifacts
 	echo "creating alpine arm64 lib artifacts ..."
-	rm -rf lib/alpine/3.17/* # cleanup old stuff
-	docker buildx build --platform linux/arm64 -f docker/create-alpine-3.17-artifacts/Dockerfile --output type=local,dest=. .
+	rm -rf lib/alpine/3.18/* # cleanup old stuff
+	docker buildx build --platform linux/arm64 -f docker/create-alpine-artifacts/Dockerfile --output type=local,dest=. .
 
 
 
