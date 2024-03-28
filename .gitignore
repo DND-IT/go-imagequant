@@ -173,3 +173,4 @@ Temporary Items
 
 /cmd/cmd
 /cmd/go-imagequant
+imagequant/test/*

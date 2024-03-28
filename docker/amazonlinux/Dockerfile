@@ -1,4 +1,4 @@
-FROM amazonlinux:2 as rust
+FROM amazonlinux:2023 as rust
 LABEL stage=rust
 WORKDIR /build
 RUN yum update -y  && \
@@ -12,7 +12,7 @@ RUN export PATH=$PATH:~/.cargo/bin/ && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=.
 
 # compile libwebp
-FROM amazonlinux:2 AS webpbuilder
+FROM amazonlinux:2023 AS webpbuilder
 LABEL maintainer="Christian Juerges (christian.juerges@tx.group) and others"
 LABEL stage=webpbuilder
 WORKDIR /build
@@ -24,7 +24,7 @@ RUN cd libwebp && \
 RUN /bin/ls -l /
 
 # compile
-FROM amazonlinux:2 as builder
+FROM amazonlinux:2023 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 RUN yum update -y && \
@@ -37,8 +37,8 @@ RUN yum update -y && \
     git
 WORKDIR /build
 
-RUN wget https://go.dev/dl/go1.20.5.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.21.8.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.8.linux-amd64.tar.gz
 
 COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib/ /usr/lib64
 COPY --from=webpbuilder /usr/local/include/webp/ /usr/local/include/webp/
@@ -50,7 +50,7 @@ RUN PATH=$PATH:/usr/local/go/bin make test
 RUN PATH=$PATH:/usr/local/go/bin make build
 
 # build image
-FROM amazonlinux:2
+FROM amazonlinux:2023
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 ENV LANG en_US.UTF-8
 ENV TERM linux
