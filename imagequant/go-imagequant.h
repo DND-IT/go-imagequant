@@ -1,4 +1,3 @@
-#pragma pack(0)
 typedef struct imgQuant {
     int status;
     size_t size;
