@@ -1,5 +1,5 @@
 # compile
-FROM golang:1.21.8-alpine3.18 as builder
+FROM golang:1.21.8-alpine3.19 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 
@@ -19,7 +19,7 @@ RUN /bin/sh -c 'make test'
 RUN /bin/sh -c 'make build'
 
 # build image, based on alpine
-FROM alpine:3.18
+FROM alpine:3.19
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 
 ENV LANG en_US.UTF-8

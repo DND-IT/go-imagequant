@@ -1,4 +1,4 @@
-FROM amazonlinux:2023 as rust
+FROM amazonlinux:2 as rust
 LABEL stage=rust
 WORKDIR /build
 RUN yum update -y  && \
@@ -6,25 +6,25 @@ RUN yum update -y  && \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cargo install cargo-c
-RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.0
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.2
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cd libimagequant/imagequant-sys && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=.
 
 # compile libwebp
-FROM amazonlinux:2023 AS webpbuilder
+FROM amazonlinux:2 AS webpbuilder
 LABEL maintainer="Christian Juerges (christian.juerges@tx.group) and others"
 LABEL stage=webpbuilder
 WORKDIR /build
 RUN yum update -y && yum -y group install "Development Tools" && \
     yum install -y libjpeg-turbo-devel libpng-devel libtiff-devel giflib-devel
-RUN git clone --depth 1 --branch v1.3.1 https://chromium.googlesource.com/webm/libwebp
+RUN git clone --depth 1 --branch v1.3.2 https://chromium.googlesource.com/webm/libwebp
 RUN cd libwebp && \
     ./autogen.sh && ./configure && make && make install
 RUN /bin/ls -l /
 
 # compile
-FROM amazonlinux:2023 as builder
+FROM amazonlinux:2 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 RUN yum update -y && \
@@ -50,7 +50,7 @@ RUN PATH=$PATH:/usr/local/go/bin make test
 RUN PATH=$PATH:/usr/local/go/bin make build
 
 # build image
-FROM amazonlinux:2023
+FROM amazonlinux:2
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 ENV LANG en_US.UTF-8
 ENV TERM linux
