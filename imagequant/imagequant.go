@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"unsafe"
 )
 
@@ -16,10 +17,6 @@ import (
 #include "go-imagequant.h"
 */
 import "C"
-
-import (
-	"image/draw"
-)
 
 const (
 	DefaultSpeed      = 4
@@ -78,7 +75,6 @@ func New(img image.Image, gamma float64, minQuality, maxQuality, speed uint) (*Q
 // Run call c lib imagequant functions needed for quantize an RGBA image.
 // Defer is used to clean up resources in Last in first out (LIFO) manner.
 func (q *QImg) Run() (image.Image, error) {
-
 	if q.ImgRGBA == nil {
 		return nil, fmt.Errorf("can not quant nil image")
 	}

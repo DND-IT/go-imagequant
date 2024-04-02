@@ -6,7 +6,7 @@ RUN yum update -y  && \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cargo install cargo-c
-RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.0
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.2
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cd libimagequant/imagequant-sys && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=.
@@ -18,7 +18,7 @@ LABEL stage=webpbuilder
 WORKDIR /build
 RUN yum update -y && yum -y group install "Development Tools" && \
     yum install -y libjpeg-turbo-devel libpng-devel libtiff-devel giflib-devel
-RUN git clone --depth 1 --branch v1.3.1 https://chromium.googlesource.com/webm/libwebp
+RUN git clone --depth 1 --branch v1.3.2 https://chromium.googlesource.com/webm/libwebp
 RUN cd libwebp && \
     ./autogen.sh && ./configure && make && make install
 RUN /bin/ls -l /
@@ -37,8 +37,8 @@ RUN yum update -y && \
     git
 WORKDIR /build
 
-RUN wget https://go.dev/dl/go1.20.5.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.21.8.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.8.linux-amd64.tar.gz
 
 COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib/ /usr/lib64
 COPY --from=webpbuilder /usr/local/include/webp/ /usr/local/include/webp/

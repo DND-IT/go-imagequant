@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -50,11 +49,11 @@ func TestQualityRun(t *testing.T) {
 
 			// keep critical images - otherwise remove
 			if delta > 0 {
-				t.Logf("file %s got bigger: %f%%", r.QuantitizedFilename, delta)
+				t.Logf("file %s got bigger: %f%%", r.QuantizedFilename, delta)
 			} else {
 				if !keepAllFiles {
 					_ = os.Remove(r.OriginalFilename)
-					_ = os.Remove(r.QuantitizedFilename)
+					_ = os.Remove(r.QuantizedFilename)
 				}
 			}
 			deltas = append(deltas, delta)
@@ -71,14 +70,17 @@ func TestQualityRun(t *testing.T) {
 	var averageDelta float64 = totalDelta / float64(len(deltas))
 
 	t.Logf("average reduction in percent %f%%", averageDelta)
-
 }
 
 func processFile(url string, index int) (r *processFileResult, err error) {
-
 	// download image to local temp file and decode into image
-	var fileIn, fileOut *os.File
-	fileIn, err = ioutil.TempFile("/tmp", fmt.Sprintf("image%v-in-*.png", index))
+	var (
+		fileIn, fileOut *os.File
+		inputImage      []byte
+		img             image.Image
+	)
+
+	fileIn, err = os.CreateTemp("/tmp", fmt.Sprintf("image%v-in-*.png", index))
 	if err != nil {
 		return
 	}
@@ -88,12 +90,13 @@ func processFile(url string, index int) (r *processFileResult, err error) {
 		return
 	}
 
-	inputImage, err := ioutil.ReadFile(fileIn.Name())
+	// inputImage, err := ioutil.ReadFile(fileIn.Name())
+	inputImage, err = os.ReadFile(fileIn.Name())
 	if err != nil {
 		return
 	}
 
-	img, _, err := image.Decode(bytes.NewReader(inputImage))
+	img, _, err = image.Decode(bytes.NewReader(inputImage))
 	if err != nil {
 		return
 	}
@@ -117,7 +120,7 @@ func processFile(url string, index int) (r *processFileResult, err error) {
 		return
 	}
 
-	fileOut, err = ioutil.TempFile("/tmp", fmt.Sprintf("image%v-out-*.png", index))
+	fileOut, err = os.CreateTemp("/tmp", fmt.Sprintf("image%v-out-*.png", index))
 	if err != nil {
 		return
 	}
@@ -128,18 +131,22 @@ func processFile(url string, index int) (r *processFileResult, err error) {
 		return
 	}
 
-	r = &processFileResult{OriginalSize: len(inputImage), QuantitizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantitizedFilename: fileOut.Name()}
+	r = &processFileResult{OriginalSize: len(inputImage), QuantizedSize: len(buff.Bytes()), OriginalFilename: fileIn.Name(), QuantizedFilename: fileOut.Name()}
 
 	return
 }
 
 func readUrls() (urls []string, err error) {
-	f, err := os.OpenFile("./test/urls.txt", os.O_RDONLY, os.ModePerm)
+	var f *os.File
+	f, err = os.OpenFile("./test/urls.txt", os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Fatalf("open file error: %v", err)
 		return
 	}
-	defer f.Close()
+
+	defer func() {
+		_ = f.Close()
+	}()
 
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
@@ -151,40 +158,48 @@ func readUrls() (urls []string, err error) {
 	}
 
 	return
-
 }
 
 func downloadFile(filepath string, url string) (err error) {
-
+	var (
+		resp *http.Response
+		out  *os.File
+	)
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err = http.Get(url)
 	if err != nil {
 		return
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err = os.Create(filepath)
 	if err != nil {
 		return
 	}
-	defer out.Close()
+	defer func() {
+		_ = out.Close()
+	}()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
+
 	return
 }
 
 type processFileResult struct {
-	OriginalSize        int
-	OriginalFilename    string
-	QuantitizedFilename string
-	QuantitizedSize     int
+	OriginalSize      int
+	OriginalFilename  string
+	QuantizedFilename string
+	QuantizedSize     int
 }
 
 func (m processFileResult) calculateDelta() (delta float64) {
-
-	diff := float64(m.QuantitizedSize - m.OriginalSize)
+	diff := float64(m.QuantizedSize - m.OriginalSize)
 	delta = (diff / float64(m.OriginalSize)) * 100
+
 	return
 }
