@@ -40,7 +40,7 @@ WORKDIR /build
 RUN wget https://go.dev/dl/go1.21.8.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.21.8.linux-amd64.tar.gz
 
-COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib/ /usr/lib64
+COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib64/ /usr/lib64
 COPY --from=webpbuilder /usr/local/include/webp/ /usr/local/include/webp/
 COPY --from=webpbuilder /usr/local/lib/ /usr/lib64/
 COPY --from=webpbuilder /usr/local/lib/pkgconfig/ /usr/local/lib/pkgconfig/
@@ -59,7 +59,7 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum
 RUN mkdir -p /opt/bin
-COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib/ /usr/lib64
+COPY --from=rust /build/libimagequant/imagequant-sys/usr/local/lib64/ /usr/lib64
 COPY --from=webpbuilder /usr/local/lib/ /usr/lib64/
 WORKDIR /opt/bin
 COPY --from=builder /build/cmd/go-imagequant .
