@@ -10,11 +10,10 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I.
-#cgo LDFLAGS: -L. -limagequant
+#cgo CFLAGS: -I./.
+#cgo LDFLAGS: -L./../libimagequant/imagequant-sys/ -l:libimagequant.a -lm
 #include "stdlib.h"
-#include "libimagequant.h"
-#include "go-imagequant.h"
+#include "../libimagequant/imagequant-sys/libimagequant.h"
 */
 import "C"
 
@@ -112,7 +111,7 @@ func (q *QImg) Run() (image.Image, error) {
 	cHeight := C.int(q.ImgRGBA.Bounds().Size().Y)
 	cGamma := C.double(q.Gamma)
 
-	inputImage := C.liq_image_create_rgba_wrapper(handle, ptrToRawRGBAPixels, cWidth, cHeight, cGamma)
+	inputImage := C.liq_image_create_rgba(handle, unsafe.Pointer(ptrToRawRGBAPixels), cWidth, cHeight, cGamma)
 
 	var liqResult *C.liq_result
 
