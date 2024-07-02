@@ -8,7 +8,6 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -21,10 +20,9 @@ import (
 )
 
 var (
-	initHeapAlloc  uint64
-	lastHeapAlloc  uint64
-	heapAllocDelta int64
-	memStats       runtime.MemStats
+	initHeapAlloc uint64
+	lastHeapAlloc uint64
+	memStats      runtime.MemStats
 )
 
 func main() {
@@ -150,8 +148,6 @@ func main() {
 			if newLineCounter > newLineEveryCount {
 				newLineCounter = 0
 				printMemStats(true)
-			} else {
-				// printMemStats(false)
 			}
 
 		}
@@ -198,12 +194,12 @@ func main() {
 
 // Read an image file.
 func Read(path string) ([]byte, error) {
-	return ioutil.ReadFile(path)
+	return os.ReadFile(path)
 }
 
 // Write an image file.
 func Write(path string, data []byte) error {
-	return ioutil.WriteFile(path, data, fs.FileMode(0640))
+	return os.WriteFile(path, data, fs.FileMode(0640))
 }
 
 func printMemStats(newLine bool) {

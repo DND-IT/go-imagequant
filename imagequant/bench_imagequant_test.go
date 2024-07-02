@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
-	"io/ioutil"
+	"os"
 	"sync"
 	"testing"
 
@@ -57,5 +57,5 @@ func BenchmarkRun(b *testing.B) {
 
 // read an image file.
 func read(path string) ([]byte, error) {
-	return ioutil.ReadFile(path)
+	return os.ReadFile(path)
 }
