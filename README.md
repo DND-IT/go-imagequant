@@ -62,6 +62,14 @@ no src image
 
 ```
 
+OSX: 
+
+install libimagequant with brew:
+
+```
+brew install libimagequant
+```
+
 Examples:
 
 Converting a png assuming you got image `benchmark_image_1.png` in your current path:

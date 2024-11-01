@@ -1,5 +1,5 @@
 module github.com/DND-IT/go-imagequant
 
-go 1.21
+go 1.23
 
-require golang.org/x/image v0.18.0
+require golang.org/x/image v0.21.0
