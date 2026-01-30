@@ -1,7 +1,7 @@
 # go-imagequant
 
 This package wraps some (not all) functionality of
-[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.2.0 rust based library.
+[libimagequant](https://pngquant.org/lib/) if you want to use the current version 4.4.1 rust based library.
 Older version of libimagequant should also work, but will show different results.
 
 Please follow the [instructions](https://github.com/ImageOptim/libimagequant/tree/main/imagequant-sys) to get a working
@@ -68,6 +68,7 @@ install libimagequant with brew:
 
 ```
 brew install libimagequant
+CGO_LDFLAGS="-L/opt/homebrew/lib"
 ```
 
 Examples:

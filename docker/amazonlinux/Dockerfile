@@ -1,12 +1,12 @@
-FROM amazonlinux:2 as rust
+FROM amazonlinux:2 AS rust
 LABEL stage=rust
 WORKDIR /build
 RUN yum update -y  && \
-    yum install gcc openssl-devel git -y
+    yum install gcc openssl-devel git libcurl-devel -y
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cargo install cargo-c
-RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.2.2
+RUN git clone https://github.com/ImageOptim/libimagequant.git --branch 4.4.1
 RUN export PATH=$PATH:~/.cargo/bin/ && \
     cd libimagequant/imagequant-sys && \
     CFLAGS=-mno-outline-atomics cargo cinstall --destdir=.
@@ -24,7 +24,7 @@ RUN cd libwebp && \
 RUN /bin/ls -l /
 
 # compile
-FROM amazonlinux:2 as builder
+FROM amazonlinux:2 AS builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 RUN yum update -y && \
