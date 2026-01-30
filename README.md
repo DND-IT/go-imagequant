@@ -68,6 +68,7 @@ install libimagequant with brew:
 
 ```
 brew install libimagequant
+CGO_LDFLAGS="-L/opt/homebrew/lib"
 ```
 
 Examples:
