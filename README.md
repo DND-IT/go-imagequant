@@ -11,10 +11,10 @@ See [cmd/go-imagequant.go](cmd/go-imagequant.go) how to use this package.
 
 ## Using docker to use the command line binary.
 
-The example cli binary supports reading and writing png, jpeg and gif (non-animated) and serves as an example how to use this package.
+
+The example CLI binary supports reading and writing PNG, JPEG, and GIF (non-animated) and serves as an example of how to use this package.
 
 See docker/alpine/Dockerfile for details.
-
 Requirements:
 
 - docker
