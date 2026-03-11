@@ -1,21 +1,37 @@
 name: CI
 
 on:
-  pull_request:
+    pull_request:
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libimagequant-dev build-essential
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.24.4'
-      - name: Build
-        run: go build ./...
-      - name: Test
-        run: go test -v ./...
+    build-and-test:
+      runs-on: ubuntu-latest
+      permissions:
+        checks: write
+        contents: read
+      steps:
+        - name: Install dependencies
+          run: sudo apt-get update && sudo apt-get install -y libimagequant-dev build-essential
+        - name: Checkout code
+          uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+        - name: Set up Go
+          uses: actions/setup-go@v6
+          with:
+            go-version: '1.24.4'
+        - name: Install gotestsum
+          run: go install gotest.tools/gotestsum@latest
+          shell: bash
+        - name: Build
+          run: go build ./...
+        - name: Run go tests
+          run: gotestsum --junitfile report.xml -- -coverprofile=coverage.out -covermode=atomic -mod vendor -timeout 45m ./...
+          shell: bash
+        - name: Publish test results
+          uses: dorny/test-reporter@v1
+          if: always()
+          with:
+            name: Go Tests
+            path: report.xml
+            reporter: java-junit
