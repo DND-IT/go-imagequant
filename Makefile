@@ -15,12 +15,8 @@ bench: ## Run bench
 test: ## Run tests
 	go test -v -mod vendor ./...
 
-docker-cmd-amazon2: ## create cmd as docker amazon based image
-	docker buildx build --platform linux/amd64 -f docker/amazonlinux/Dockerfile --tag go-imagequant:latest --load .
-
-docker-cmd-alpine: ## create cmd as docker amazon based image
+docker-cmd-alpine: ## create cmd as docker image
 	docker buildx build -f docker/alpine/Dockerfile --tag go-imagequant:latest --load .
-
 
 docker-lib-ubuntu-amd64: ## create ubuntu lib artifacts
 	echo "creating ubuntu  lib artifacts ..."
