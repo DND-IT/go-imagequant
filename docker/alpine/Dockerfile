@@ -1,5 +1,5 @@
 # compile
-FROM golang:1.24.4-alpine3.22 as builder
+FROM golang:1.26.3-alpine3.23 as builder
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 LABEL stage=builder
 
