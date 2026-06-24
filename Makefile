@@ -7,7 +7,7 @@ lint: ## Lint the project
 	golangci-lint --timeout 300s run ./...
 
 build: ## Build cmd
-	cd cmd && CGO_ENABLED=1 go build -o go-imagequant .
+	cd cmd && CGO_ENABLED=1 go build -mod vendor -o go-imagequant .
 
 bench: ## Run bench
 	cd imagequant && go test -mod vendor -bench . -benchmem -run=^$

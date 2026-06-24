@@ -13,6 +13,8 @@ import (
 	"sync"
 	"testing"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/DND-IT/go-imagequant/imagequant"
 )
 

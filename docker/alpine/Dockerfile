@@ -19,7 +19,7 @@ RUN /bin/sh -c 'make test'
 RUN /bin/sh -c 'make build'
 
 # build image, based on alpine
-FROM alpine:3.22
+FROM alpine:3.24
 LABEL maintainer="Christian Juerges, christian.juerges@tx.group"
 
 ENV LANG en_US.UTF-8

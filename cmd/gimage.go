@@ -60,7 +60,7 @@ func Encode(img image.Image, imageTypeName string) ([]byte, error) {
 		err = jpeg.Encode(buff, img, &jpeg.Options{Quality: jpeg.DefaultQuality})
 	case "gif":
 		err = gif.Encode(buff, img, nil)
-	//case "webp":
+	case "webp":
 	//	var options *encoder.Options
 	//
 	//	options, err = encoder.NewLossyEncoderOptions(encoder.PresetDefault, cfg.ImageOptions.WebpQuality)
